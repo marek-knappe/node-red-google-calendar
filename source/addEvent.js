@@ -71,19 +71,59 @@ module.exports = function(RED) {
             };
             request(opts, function (error, response, body) {
                 if (error) {
-                    node.error(error,{});
+                    msg.payload = "Error adding event: " + error.message;
+                    msg.error = error.message;
+                    node.error(error, msg);
                     node.status({fill:"red",shape:"ring",text:"calendar.status.failed"});
+                    node.send(msg);
                     return;
-                }       
-                if (JSON.parse(body).kind == "calendar#event") {
-                    msg.payload = `Successfully add event to ${calendarId}. ${JSON.parse(body).hangoutLink ? `Link for Meet: ${JSON.parse(body).hangoutLink}`: ""}`
-                    msg.meetLink = JSON.parse(body).hangoutLink ? JSON.parse(body).hangoutLink : null;
-                    msg.eventId = JSON.parse(body).id
-                    node.status({ fill: "green", shape: "ring", text: "Added successfully" });
-                } else {
-                    msg.payload = "Fail"
-                    node.status({ fill: "red", shape: "ring", text: "Fail to add" });
                 }
+                
+                // Check for HTTP error status codes
+                if (response.statusCode < 200 || response.statusCode >= 300) {
+                    let errorMsg = "HTTP Error: " + response.statusCode;
+                    try {
+                        const errorBody = JSON.parse(body);
+                        if (errorBody.error && errorBody.error.message) {
+                            errorMsg += " - " + errorBody.error.message;
+                        }
+                    } catch (e) {
+                        // If we can't parse the error body, use the raw response
+                        if (body) {
+                            errorMsg += " - " + body;
+                        }
+                    }
+                    
+                    msg.payload = "Failed to add event: " + errorMsg;
+                    msg.error = errorMsg;
+                    msg.statusCode = response.statusCode;
+                    node.status({ fill: "red", shape: "ring", text: "Failed to add" });
+                    node.send(msg);
+                    return;
+                }
+                
+                try {
+                    const responseData = JSON.parse(body);
+                    if (responseData.kind == "calendar#event") {
+                        msg.payload = `Successfully added event to ${calendarId}. ${responseData.hangoutLink ? `Link for Meet: ${responseData.hangoutLink}`: ""}`;
+                        msg.meetLink = responseData.hangoutLink ? responseData.hangoutLink : null;
+                        msg.eventLink = responseData.htmlLink ? responseData.htmlLink : null;
+                        msg.eventId = responseData.id;
+                        msg.success = true;
+                        node.status({ fill: "green", shape: "ring", text: "Added successfully" });
+                    } else {
+                        msg.payload = "Failed to add event: Invalid response format";
+                        msg.error = "Invalid response format";
+                        msg.success = false;
+                        node.status({ fill: "red", shape: "ring", text: "Failed to add" });
+                    }
+                } catch (parseError) {
+                    msg.payload = "Failed to add event: Invalid JSON response";
+                    msg.error = "Invalid JSON response: " + parseError.message;
+                    msg.success = false;
+                    node.status({ fill: "red", shape: "ring", text: "Failed to add" });
+                }
+                
                 node.send(msg);
             })        
         });

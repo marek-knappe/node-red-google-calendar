@@ -33,8 +33,11 @@ module.exports = function (RED) {
             
             request(opts, function (error, response, body) {
                 if (error) {
-                    node.error(error, {});
+                    msg.payload = "Error deleting event: " + error.message;
+                    msg.error = error.message;
+                    node.error(error, msg);
                     node.status({ fill: "red", shape: "ring", text: "calendar.status.failed" });
+                    node.send(msg);
                     return;
                 }
                 
@@ -43,9 +46,28 @@ module.exports = function (RED) {
                     msg.payload = "Successfully deleted event from " + calendarId;
                     msg.eventId = eventId;
                     msg.calendarId = calendarId;
+                    msg.success = true;
                     node.status({ fill: "green", shape: "ring", text: "Deleted successfully" });
                 } else {
-                    msg.payload = "Failed to delete event. Status: " + response.statusCode;
+                    let errorMsg = "HTTP Error: " + response.statusCode;
+                    try {
+                        if (body) {
+                            const errorBody = JSON.parse(body);
+                            if (errorBody.error && errorBody.error.message) {
+                                errorMsg += " - " + errorBody.error.message;
+                            }
+                        }
+                    } catch (e) {
+                        // If we can't parse the error body, use the raw response
+                        if (body) {
+                            errorMsg += " - " + body;
+                        }
+                    }
+                    
+                    msg.payload = "Failed to delete event: " + errorMsg;
+                    msg.error = errorMsg;
+                    msg.statusCode = response.statusCode;
+                    msg.success = false;
                     node.status({ fill: "red", shape: "ring", text: "Failed to delete" });
                 }
                 node.send(msg);

@@ -66,19 +66,59 @@ module.exports = function (RED) {
             
             request(opts, function (error, response, body) {
                 if (error) {
-                    node.error(error, {});
+                    msg.payload = "Error updating event: " + error.message;
+                    msg.error = error.message;
+                    node.error(error, msg);
                     node.status({ fill: "red", shape: "ring", text: "calendar.status.failed" });
+                    node.send(msg);
                     return;
                 }
-                if (JSON.parse(body).kind == "calendar#event") {
-                    msg.payload = "Successfully update event of " + calendarId
-                    msg.meetLink = JSON.parse(body).hangoutLink ? JSON.parse(body).hangoutLink : null;
-                    msg.thisEventId = JSON.parse(body).id
-                    node.status({ fill: "green", shape: "ring", text: "Update successfully" });
-                } else {
-                    msg.payload = "Fail to update"
-                    node.status({ fill: "red", shape: "ring", text: "Fail to update" });
+                
+                // Check for HTTP error status codes
+                if (response.statusCode < 200 || response.statusCode >= 300) {
+                    let errorMsg = "HTTP Error: " + response.statusCode;
+                    try {
+                        const errorBody = JSON.parse(body);
+                        if (errorBody.error && errorBody.error.message) {
+                            errorMsg += " - " + errorBody.error.message;
+                        }
+                    } catch (e) {
+                        // If we can't parse the error body, use the raw response
+                        if (body) {
+                            errorMsg += " - " + body;
+                        }
+                    }
+                    
+                    msg.payload = "Failed to update event: " + errorMsg;
+                    msg.error = errorMsg;
+                    msg.statusCode = response.statusCode;
+                    node.status({ fill: "red", shape: "ring", text: "Failed to update" });
+                    node.send(msg);
+                    return;
                 }
+                
+                try {
+                    const responseData = JSON.parse(body);
+                    if (responseData.kind == "calendar#event") {
+                        msg.payload = "Successfully updated event of " + calendarId;
+                        msg.meetLink = responseData.hangoutLink ? responseData.hangoutLink : null;
+                        msg.eventLink = responseData.htmlLink ? responseData.htmlLink : null;
+                        msg.thisEventId = responseData.id;
+                        msg.success = true;
+                        node.status({ fill: "green", shape: "ring", text: "Update successfully" });
+                    } else {
+                        msg.payload = "Failed to update event: Invalid response format";
+                        msg.error = "Invalid response format";
+                        msg.success = false;
+                        node.status({ fill: "red", shape: "ring", text: "Failed to update" });
+                    }
+                } catch (parseError) {
+                    msg.payload = "Failed to update event: Invalid JSON response";
+                    msg.error = "Invalid JSON response: " + parseError.message;
+                    msg.success = false;
+                    node.status({ fill: "red", shape: "ring", text: "Failed to update" });
+                }
+                
                 node.send(msg);
             })
         });
