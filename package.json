@@ -21,7 +21,8 @@
             "google-api-auth-config": "source/google.js",
             "addEvent": "source/addEvent.js",
             "getEvent": "source/getEvent.js",
-            "updateEvent": "source/updateEvent.js"
+            "updateEvent": "source/updateEvent.js",
+            "deleteEvent": "source/deleteEvent.js"
         }
     },
     "dependencies": {
