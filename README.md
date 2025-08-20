@@ -1,245 +1,282 @@
-Fork of the node-red-contrib-google-calendar package.
-[node-red-contrib-google-calendar repository](https://github.com/taminhhienmor/node-red-contrib-google-calendar.git)
+# Node-RED Google Calendar Enhanced
 
-## Features
-Add new, update and retrieve list of events on google-calendar
+[![npm version](https://badge.fury.io/js/%40marek-knappe%2Fnode-red-google-calendar.svg)](https://badge.fury.io/js/%40marek-knappe%2Fnode-red-google-calendar)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Node-RED](https://img.shields.io/badge/Node--RED-3.1.9+-green.svg)](https://nodered.org/)
 
-## Use Cases
-**1. Automated Meeting Reminders**
+Enhanced Google Calendar nodes for Node-RED with improved error handling, event links, delete functionality, and robust OAuth2 authentication.
 
-**Description:** Automatically send reminders for upcoming meetings or events from Google Calendar.
+> **Note**: This package is based on the original work by [@platmac/node-red-google-calendar](https://github.com/PlatmaC/node-red-google-calendar) with significant improvements and enhancements.
 
-**Steps:**
+## ✨ Features
 
-* Use the @platmac/node-red-google-calendar node to retrieve events.
+- **📅 Complete Calendar Operations**: Create, read, update, and delete Google Calendar events
+- **🔗 Event Links**: Direct links to calendar events and Google Meet video calls
+- **🛡️ Robust Error Handling**: Comprehensive error responses with detailed debugging information
+- **🔐 Enhanced Authentication**: Improved OAuth2 token refresh and management
+- **📧 Attendee Management**: Support for event attendees and notifications
+- **🎥 Google Meet Integration**: Automatic conference creation with video links
+- **🌍 Timezone Support**: Proper timezone handling for global events
 
-* Filter events occurring within a specified time frame (e.g., 30 minutes).
+## 🚀 What's New in v3.0.1
 
-* Send a reminder via email or messaging service using appropriate nodes.
+- **NEW**: `deleteEvent` node for removing calendar events
+- **IMPROVED**: Enhanced error handling across all modules
+- **FIXED**: OAuth2 token refresh issues causing 401 errors
+- **ADDED**: Event links (EventLink and MeetLink) in all responses
+- **ENHANCED**: Proactive token management with expiry buffering
 
-**2. Room Booking System**
+## 📦 Installation
 
-**Description:** Create a room booking system that updates a Google Calendar to show room availability and bookings.
+### Via Node-RED Palette Manager (Recommended)
+1. Open Node-RED
+2. Go to **Manage Palette** → **Install**
+3. Search for `@marek-knappe/node-red-google-calendar`
+4. Click **Install**
 
-**Steps:**
-
-* Create an interface for users to book a room.
-
-* Use the @platmac/node-red-google-calendar node to check room availability.
-
-* If available, add the booking to the Google Calendar.
-
-* Notify users of successful bookings.
-
-**3. Daily Agenda Notifications**
-**Description:** Send daily agendas to users at the start of each day.
-
-**Steps:**
-
-* Use the @platmac/node-red-google-calendar node to retrieve events for the day.
-
-* Format the events into a readable agenda.
-
-* Send the agenda via email or messaging service using appropriate nodes.
-
-**4. Event-Driven Automation**
-**Description:** Trigger home automation actions based on calendar events.
-
-**Steps:**
-
-* Use the @platmac/node-red-google-calendar node to monitor for specific events (e.g., “Meeting with client”).
-
-* When such an event is detected, trigger actions like turning on lights or adjusting the thermostat.
-
-* Integrate with home automation nodes to perform these actions.
-
-**5. Travel Time Notifications**
-**Description:** Notify users of the best departure time based on calendar events and real-time traffic conditions.
-
-**Steps:**
-
-* Use the @platmac/node-red-google-calendar node to retrieve the next event location.
-
-* Use a traffic information service to calculate travel time.
-
-* Send a notification with the best departure time considering current traffic.
-
-**6. Task Management Integration**
-**Description:** Synchronize tasks from a task management system to Google Calendar.
-
-**Steps:**
-
-* Retrieve tasks from the task management system.
-
-* Use the @platmac/node-red-google-calendar node to create calendar events based on tasks.
-
-* Update tasks in the task management system as events are marked as completed.
-
-**7. Public Event Announcements**
-**Description:** Automatically post public events from Google Calendar to social media.
-
-**Steps:**
-
-* Use the @platmac/node-red-google-calendar node to retrieve public events.
-
-* Format event details for social media.
-
-* Use social media nodes to post event details to platforms like Twitter or Facebook.
-
-These use cases demonstrate the versatility of integrating Google Calendar with Node-RED, allowing for automation and improved efficiency in various scenarios.
-
-
-## Install
-@platmac/node-red-google-calendar can be install using the node-red editor's pallete or by running npm in the console:
-
-``` bash
-npm install @platmac/node-red-google-calendar
+### Via npm
+```bash
+npm install @marek-knappe/node-red-google-calendar
 ```
 
-## Setup Google Calendar API connection
+## 🔧 Setup & Configuration
 
-**1.** Add one of the nodes you want to use to your flow.
+### 1. Google Calendar API Setup
 
-**2.** Press "Edit" button near the Google Account field. You will see the page with two fields: **Client Id** and **Secret**. At the hint above you will see the URL, that you have to use later in Google Developer Console.
+1. **Create Google Cloud Project**
+   - Go to [Google Cloud Console](https://console.cloud.google.com/)
+   - Create a new project or select existing one
 
-**3.** Go to **Google Developer Consol**e select (or create) your project.
+2. **Enable Google Calendar API**
+   - Go to **APIs & Services** → **Library**
+   - Search for "Google Calendar API"
+   - Click **Enable**
 
-**4.** Go to Library and add the **Google Calendar API**.
+3. **Create OAuth 2.0 Credentials**
+   - Go to **APIs & Services** → **Credentials**
+   - Click **Create Credentials** → **OAuth 2.0 Client IDs**
+   - Choose **Web application**
+   - Add authorized redirect URIs (shown in Node-RED)
 
-**5.** Then go to **"Credentials"** and add a new **OAuth Client-ID**.
+### 2. Node-RED Configuration
 
-**6.** In creation page select **Web application**
+1. **Add Calendar Node**
+   - Drag any Google Calendar node to your flow
+   - Click **Edit** on the Google Account field
 
-**5.** In the **"Authorized redirect URIs"** field you have to add URL from the hint in your node (**item number 2 on this list**). 
+2. **Enter Credentials**
+   - **Client ID**: From Google Cloud Console
+   - **Client Secret**: From Google Cloud Console
 
-**6.** In the **"Authorized JavaScript origins"** field you have to add URL from the hint in your node shortened until first "/" (**item number 2 on this list**). 
+3. **Authenticate**
+   - Click **Authenticate with Google**
+   - Grant permissions in browser
+   - Click **Add** to complete setup
 
-**7.** After creation you can see your **Client-ID** and **Client-Key**. You can copy those or hit OK.
+## 📋 Available Nodes
 
-**8.** Open the page with your node and enter **Client Id** and **Secret** strings into fields.
+### 🔍 Get Event
+Retrieves events from Google Calendar within a specified time range.
 
-**9.** Now press the "**Authenticate with Google"** button and a new window of your browser will open. Follow the instructions and grant access to your project.
+**Input Properties:**
+- `msg.payload.timemin` - Start time (e.g., "2024-01-01 09:00:00")
+- `msg.payload.timemax` - End time (e.g., "2024-01-01 17:00:00")
+- `msg.calendarId` - Calendar ID (e.g., "user@gmail.com")
 
-**12.** At the end of the authentication process, there will be page with message "Authorised - you can close this window and return to Node-RED". Close the page and go back to your node.
+**Output Properties:**
+- `msg.payload` - Array of event objects
+- `msg.eventId` - Event identifier
+- `msg.calendarId` - Calendar ID
+- `msg.start` - Event start time
+- `msg.end` - Event end time
+- `msg.title` - Event title
+- `msg.attendees` - List of attendees
+- `msg.EventLink` - Direct link to calendar event
+- `msg.MeetLink` - Google Meet video call link
 
-**13.** Press the **"Add"** button and you will finish the authorization process.
+### ➕ Add Event
+Creates new events in Google Calendar.
 
-**14.** Press the **"Deploy"** button and calendar list will fill up with available calendars.
+**Input Properties:**
+- `msg.calendarId` - Target calendar ID
+- `msg.title` - Event title
+- `msg.description` - Event description
+- `msg.location` - Event location
+- `msg.start` - Start time
+- `msg.end` - End time
+- `msg.timezone` - Timezone offset
+- `msg.conference` - Enable Google Meet
 
-## List nodes
-**Get Event**
+**Output Properties:**
+- `msg.payload` - Success/Error message
+- `msg.eventId` - Created event ID
+- `msg.meetLink` - Google Meet link (if enabled)
+- `msg.eventLink` - Direct calendar event link
+- `msg.success` - Boolean success flag
 
-Return the event in range time from Google Calendar.
+### ✏️ Update Event
+Modifies existing calendar events.
 
-The incoming message can provide the following properties:
+**Input Properties:**
+- `msg.calendarId` - Calendar ID
+- `msg.eventId` - Event ID to update
+- `msg.title` - New title
+- `msg.description` - New description
+- `msg.location` - New location
+- `msg.conference` - Enable/disable Google Meet
+- `msg.emailNotify` - Notify attendees of changes
 
-* **msg.payload.timemin** - a text search string used to select relevant events
+**Output Properties:**
+- `msg.payload` - Success/Error message
+- `msg.thisEventId` - Updated event ID
+- `msg.meetLink` - Google Meet link
+- `msg.eventLink` - Direct calendar event link
+- `msg.success` - Boolean success flag
 
-* **msg.payload.timemax** - a text search string used to select relevant events
+### 🗑️ Delete Event
+Removes events from Google Calendar.
 
-**Notice: time should be entered in timezone that is used in Google Calendar**
+**Input Properties:**
+- `msg.calendarId` - Calendar ID
+- `msg.eventId` - Event ID to delete
+- `msg.emailNotify` - Notify attendees of deletion
 
-example: msg.payload = { timemin:"Feb 12, 2020 00:15:15", timemax:"Feb 13, 2020 00:15:15"
+**Output Properties:**
+- `msg.payload` - Success/Error message
+- `msg.eventId` - Deleted event ID
+- `msg.calendarId` - Calendar ID
+- `msg.success` - Boolean success flag
 
-* **msg.calendarId** - a text search string used to select relevant events. Example: msg.calendarId = "abc@gmail.com"
+## 💡 Use Cases
 
-The message sent from the node will have properties:
-
-* **msg.payload** - an array of objects (events) each of which containing:
-
-* **msg.calendarId** - the id of the calendar where event is created
-
-* **msg.eventId** - the id of the exact event 
-
-* **start** - Date of start time - midnight for all day event
-
-* **end** - Date of end time - midnight for all day event
-
-**Notice: time will be displayed in timezone that is used in Google Calendar**
-
-* **title** - the summary string from the calendar entry
-
-* **attendees** - list of objects containing name and email properties
-
-**Add Event**
-
-Send a message every time an event occurs in a Google Calendar.
-
-The incoming message can provide the following properties:
-
-* **msg.calendarId** - the id of the calendar you want to create event for
-
-* **msg.title** - the summary string from the calendar entry
-
-* **msg.description** - the description from the calendar entry
-
-* **msg.location** - the location string from the calendar entry
-
-* **msg.conference** - the flag to create Google Meet conference for this event
-
-* **msg.timezone** - timezone for entered date.
-
-* **msg.start** - date of start time
-
-* **msg.end** - date of end time
-
-The message sent from the node will have properties:
-
-* **payload** - Success/Error
-
-* **meetLink** - link for Google Meet event if created
-
-
-**Update Event**
-
-Update an event occurs in a Google Calendar.
-
-The incoming message can provide the following properties:
-
-* **msg.calendarId** - the id of the calendar you want to create event for
-
-* **msg.eventId** - the id of the event you want to update
-
-* **msg.title** - the summary string from the calendar entry
-
-* **msg.description** - the description from the calendar entry
-
-* **msg.conference** - the flag to create Google Meet conference for this event
-
-* **msg.emailNotify** - the flag to notify event participants about changes
-
-* **msg.location** - the location string from the calendar entry
-
-You can notify all attendees about event changes using the checkbox "Email notify"
-
-The message sent from the node will have properties:
-
-* **payload** - Success/Error
-
-* **meetLink** - link for Google Meet event if created
-
-## Example node
-
-Get event from google calendar...<br>
-![get-event](/examples/get_flow.png)
-![get-calendar-success](/examples/get.png)
-
-``` node
-[ { "id": "275b61dfe7c4f106", "type": "tab", "label": "Flow 1", "disabled": false, "info": "", "env": [] }, { "id": "10024703.ece9d9", "type": "inject", "z": "275b61dfe7c4f106", "name": "", "props": [ { "p": "payload" }, { "p": "topic", "vt": "str" } ], "repeat": "", "crontab": "", "once": false, "onceDelay": 0.1, "topic": "", "payload": "", "payloadType": "date", "x": 610, "y": 400, "wires": [ [ "df05d057.adc84" ] ] }, { "id": "e4c18a06.b32d68", "type": "debug", "z": "275b61dfe7c4f106", "name": "", "active": true, "tosidebar": true, "console": false, "tostatus": false, "complete": "false", "x": 1010, "y": 400, "wires": [] }, { "id": "df05d057.adc84", "type": "getEventFromCalendar", "z": "275b61dfe7c4f106", "google": "", "calendarId": "", "time": "06/18/2024 12:00 AM - 06/30/2024 11:59 PM", "x": 810, "y": 400, "wires": [ [ "e4c18a06.b32d68" ] ] } ]
+### 🤖 Automated Meeting Reminders
+```javascript
+// Get upcoming meetings and send reminders
+const events = await getEvents({ timemin: "now", timemax: "+1h" });
+events.forEach(event => {
+    if (event.attendees.length > 0) {
+        sendReminder(event.title, event.EventLink, event.attendees);
+    }
+});
 ```
 
-Add event to google calendar...<br>
-![add-event](/examples/add_flow.png)
-![add-event-calendar-success](/examples/add.png)
+### 🏢 Room Booking System
+```javascript
+// Check room availability and book
+const availability = await getEvents({ 
+    calendarId: "room@company.com",
+    timemin: "2024-01-15 09:00:00",
+    timemax: "2024-01-15 10:00:00"
+});
 
-``` node
-[ { "id": "a65b6e9c6cc0690b", "type": "tab", "label": "Flow 2", "disabled": false, "info": "", "env": [] }, { "id": "1b7a6e62.038442", "type": "inject", "z": "a65b6e9c6cc0690b", "name": "", "repeat": "", "crontab": "", "once": false, "onceDelay": 0.1, "topic": "", "payload": "", "payloadType": "date", "x": 580, "y": 380, "wires": [ [ "2d095a31.3d2dc6" ] ] }, { "id": "fda646ee.5e2fa8", "type": "debug", "z": "a65b6e9c6cc0690b", "name": "", "active": true, "tosidebar": true, "console": false, "tostatus": false, "complete": "false", "x": 970, "y": 380, "wires": [] }, { "id": "2d095a31.3d2dc6", "type": "addEventToCalendar", "z": "a65b6e9c6cc0690b", "google": "", "calendarId2": "", "timezone": "+3", "conference": true, "tittle": "Test title", "description": "This is description", "location": "Ukraine", "time": "06/25/2024 12:00 AM - 06/26/2024 11:59 PM", "attend": "1", "email1": "test@example.com", "name1": "Test User", "email2": "", "name2": "", "email3": "", "name3": "", "email4": "", "name4": "", "email5": "", "name5": "", "x": 770, "y": 380, "wires": [ [ "fda646ee.5e2fa8" ] ] } ]
+if (availability.length === 0) {
+    await addEvent({
+        calendarId: "room@company.com",
+        title: "Team Meeting",
+        start: "2024-01-15 09:00:00",
+        end: "2024-01-15 10:00:00"
+    });
+}
 ```
 
-Update event from google calendar...<br>
-![update-event](/examples/udp_flow.png)
-![update-event-calendar-success](/examples/upd.png)
+### 📅 Daily Agenda Notifications
+```javascript
+// Send daily agenda to team
+const today = new Date().toISOString().split('T')[0];
+const agenda = await getEvents({
+    timemin: today + " 00:00:00",
+    timemax: today + " 23:59:59"
+});
 
-``` node
-[ { "id": "1b7a6e62.038442", "type": "inject", "z": "275b61dfe7c4f106", "name": "", "repeat": "", "crontab": "", "once": false, "onceDelay": 0.1, "topic": "", "payload": "", "payloadType": "date", "x": 620, "y": 760, "wires": [ [ "ebc0922737875a6c" ] ] }, { "id": "fda646ee.5e2fa8", "type": "debug", "z": "275b61dfe7c4f106", "name": "", "active": true, "tosidebar": true, "console": false, "tostatus": false, "complete": "false", "x": 1010, "y": 760, "wires": [] }, { "id": "ebc0922737875a6c", "type": "updateEventAtCalendar", "z": "275b61dfe7c4f106", "google": "", "calendarId": "", "eventId": "qjpupj9nfsv22e24a0qn010q0o", "title": "New Title", "description": "", "location": "", "emailNotify": true, "conference": false, "x": 820, "y": 760, "wires": [ [ "fda646ee.5e2fa8" ] ] } ]
+const agendaText = agenda.map(event => 
+    `${event.start} - ${event.title}`
+).join('\n');
+
+sendNotification("Today's Agenda", agendaText);
 ```
+
+### 🏠 Smart Home Integration
+```javascript
+// Trigger home automation based on calendar events
+const events = await getEvents({ timemin: "now", timemax: "+30m" });
+events.forEach(event => {
+    if (event.title.includes("Meeting")) {
+        turnOnLights();
+        adjustThermostat();
+        sendNotification("Meeting starting soon", event.EventLink);
+    }
+});
+```
+
+## 🔍 Error Handling
+
+All nodes provide comprehensive error handling with consistent response formats:
+
+```javascript
+// Success response
+{
+    payload: "Successfully added event to calendar",
+    success: true,
+    eventId: "abc123",
+    eventLink: "https://calendar.google.com/event/...",
+    meetLink: "https://meet.google.com/..."
+}
+
+// Error response
+{
+    payload: "Failed to add event: HTTP Error: 400 - Invalid request",
+    success: false,
+    error: "HTTP Error: 400 - Invalid request",
+    statusCode: 400
+}
+```
+
+## 🛠️ Troubleshooting
+
+### Common Issues
+
+**401 Authentication Error**
+- Tokens automatically refresh every 5 minutes
+- Check Google Cloud Console credentials
+- Ensure Calendar API is enabled
+
+**Calendar Not Found**
+- Verify calendar ID format
+- Check calendar sharing permissions
+- Ensure OAuth scope includes calendar access
+
+**Event Creation Fails**
+- Validate date/time formats
+- Check required fields (title, start, end)
+- Verify calendar write permissions
+
+### Debug Mode
+Enable detailed logging in Node-RED settings to troubleshoot issues.
+
+## 📚 Examples
+
+See the `examples/` folder for complete flow examples and screenshots.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit issues and pull requests.
+
+## 📄 License
+
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **Original Work**: Based on [@platmac/node-red-google-calendar](https://github.com/PlatmaC/node-red-google-calendar) by Hooke Jr.
+- **Enhancements**: Significant improvements by Marek Knappe
+- **Community**: Node-RED community for feedback and testing
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/marek-knappe/node-red-google-calendar/issues)
+- **Documentation**: [GitHub Wiki](https://github.com/marek-knappe/node-red-google-calendar/wiki)
+- **Email**: marek.knappe@gmail.com
+
+---
+
+**Made with ❤️ for the Node-RED community**
