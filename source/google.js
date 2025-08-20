@@ -56,6 +56,8 @@ module.exports = function(RED) {
             node.error(RED._("google.error.no-refresh-token"));
             return cb(RED._("google.error.no-refresh-token"));
         }
+        
+        node.warn("Refreshing Google OAuth2 access token...");
 
         var exponentialBackoff = createExponentialBackoff();
         exponentialBackoff.on('backoff', function(number, delay) {
@@ -97,6 +99,10 @@ module.exports = function(RED) {
                         data.expires_in + (new Date().getTime()/1000);
                     credentials.tokenType = data.token_type;
                     RED.nodes.addCredentials(node.id, credentials);
+                    
+                    var expiryDate = new Date(credentials.expireTime * 1000);
+                    node.warn("Google OAuth2 token refreshed successfully. Expires: " + expiryDate.toISOString());
+                    
                     if (typeof cb !== undefined) {
                         cb();
                     }
@@ -117,19 +123,25 @@ module.exports = function(RED) {
         if (!req.hasOwnProperty("json")) {
             req.json = true;
         }
-        // always set access token to the latest ignoring any already present
-        req.auth = { bearer: this.credentials.accessToken };
-        //console.log(require('util').inspect(req));
+        // Check if token is expired or will expire soon (within 5 minutes)
+        var currentTime = new Date().getTime()/1000;
+        var tokenExpiryBuffer = 300; // 5 minutes buffer
+        
         if (!this.credentials.expireTime ||
-            this.credentials.expireTime < (new Date().getTime()/1000)) {
+            this.credentials.expireTime < (currentTime + tokenExpiryBuffer)) {
             node.refreshToken(function (err) {
                 if (err) {
                     return cb(err);
                 }
+                // Update the request with new token
+                req.auth = { bearer: node.credentials.accessToken };
                 node.request(req, cb);
             });
             return;
         }
+        
+        // always set access token to the latest ignoring any already present
+        req.auth = { bearer: this.credentials.accessToken };
 
         var exponentialBackoff = createExponentialBackoff();
         exponentialBackoff.on('backoff', function(number, delay) {
@@ -144,6 +156,18 @@ module.exports = function(RED) {
             request(req, function(err, result, data) {
                 if (err) {
                     return exponentialBackoff.backoff({err: err, data: data});
+                } else if (result.statusCode === 401) {
+                    // Token expired, refresh and retry
+                    node.warn(RED._("google.warn.refreshing-accesstoken"));
+                    node.refreshToken(function (err) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        // Update the request with new token
+                        req.auth = { bearer: node.credentials.accessToken };
+                        return node.request(req, cb);
+                    });
+                    return;
                 } else if (result.statusCode >= 400) {
                     data = {
                         error: {
@@ -152,14 +176,6 @@ module.exports = function(RED) {
                         },
                     };
                     return exponentialBackoff.backoff({err: err, data: data});
-                } else if (data.error && data.error.code === 401) {
-                    node.warn(RED._("google.warn.refreshing-accesstoken"));
-                    node.refreshToken(function (err) {
-                        if (err) {
-                            return cb(err);
-                        }
-                        return node.request(req, cb);
-                    });
                 }
                 cb(err, data);
             });
