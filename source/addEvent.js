@@ -1,4 +1,4 @@
-var request = require('request');
+var axios = require('axios');
 module.exports = function(RED) {
     "use strict";
     function addEventToCalendar(n) {
@@ -44,17 +44,17 @@ module.exports = function(RED) {
         
         const conferenceData = {
             createRequest: {requestId: requestIdGenerator()}
-          }
+        };
           
-        var api = 'https://www.googleapis.com/calendar/v3/calendars/'        
-            var newObj = {
-                summary: n.tittle,
-                description: n.description,
-                location: n.location,
-                start: {dateTime: new Date(timeStart)},
-                end: {dateTime: new Date(timeEnd)},
-                attendees: arrAttend,
-            }
+        var api = 'https://www.googleapis.com/calendar/v3/calendars/';        
+        var newObj = {
+            summary: n.tittle,
+            description: n.description,
+            location: n.location,
+            start: {dateTime: new Date(timeStart)},
+            end: {dateTime: new Date(timeEnd)},
+            attendees: arrAttend
+        };
 
             if (n.conference){
                 newObj.conferenceData = conferenceData;
@@ -67,43 +67,11 @@ module.exports = function(RED) {
                     "Content-Type": "application/json",
                     "Authorization": "Bearer " + node.google.credentials.accessToken
                 },
-                body: JSON.stringify(newObj)
+                data: newObj
             };
-            request(opts, function (error, response, body) {
-                if (error) {
-                    msg.payload = "Error adding event: " + error.message;
-                    msg.error = error.message;
-                    node.error(error, msg);
-                    node.status({fill:"red",shape:"ring",text:"calendar.status.failed"});
-                    node.send(msg);
-                    return;
-                }
-                
-                // Check for HTTP error status codes
-                if (response.statusCode < 200 || response.statusCode >= 300) {
-                    let errorMsg = "HTTP Error: " + response.statusCode;
-                    try {
-                        const errorBody = JSON.parse(body);
-                        if (errorBody.error && errorBody.error.message) {
-                            errorMsg += " - " + errorBody.error.message;
-                        }
-                    } catch (e) {
-                        // If we can't parse the error body, use the raw response
-                        if (body) {
-                            errorMsg += " - " + body;
-                        }
-                    }
-                    
-                    msg.payload = "Failed to add event: " + errorMsg;
-                    msg.error = errorMsg;
-                    msg.statusCode = response.statusCode;
-                    node.status({ fill: "red", shape: "ring", text: "Failed to add" });
-                    node.send(msg);
-                    return;
-                }
-                
-                try {
-                    const responseData = JSON.parse(body);
+            axios(opts)
+                .then(response => {
+                    const responseData = response.data;
                     if (responseData.kind == "calendar#event") {
                         msg.payload = `Successfully added event to ${calendarId}. ${responseData.hangoutLink ? `Link for Meet: ${responseData.hangoutLink}`: ""}`;
                         msg.meetLink = responseData.hangoutLink ? responseData.hangoutLink : null;
@@ -117,15 +85,17 @@ module.exports = function(RED) {
                         msg.success = false;
                         node.status({ fill: "red", shape: "ring", text: "Failed to add" });
                     }
-                } catch (parseError) {
-                    msg.payload = "Failed to add event: Invalid JSON response";
-                    msg.error = "Invalid JSON response: " + parseError.message;
-                    msg.success = false;
-                    node.status({ fill: "red", shape: "ring", text: "Failed to add" });
-                }
-                
-                node.send(msg);
-            })        
+                    
+                    node.send(msg);
+                })
+                .catch(error => {
+                    msg.payload = "Error adding event: " + error.message;
+                    msg.error = error.message;
+                    node.error(error, msg);
+                    node.status({fill:"red",shape:"ring",text:"calendar.status.failed"});
+                    node.send(msg);
+                    return;
+                });
         });
     }
     RED.nodes.registerType("addEventToCalendar", addEventToCalendar);

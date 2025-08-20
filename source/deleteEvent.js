@@ -1,5 +1,5 @@
-var request = require('request');
-module.exports = function (RED) {
+var axios = require('axios');
+module.exports = function(RED) {
     "use strict";
     function deleteEventFromCalendar(n) {
         RED.nodes.createNode(this, n);
@@ -31,47 +31,45 @@ module.exports = function (RED) {
                 }
             };
             
-            request(opts, function (error, response, body) {
-                if (error) {
+            axios(opts)
+                .then(response => {
+                    if (response.status === 204) {
+                        msg.payload = "Successfully deleted event from " + calendarId;
+                        msg.eventId = eventId;
+                        msg.calendarId = calendarId;
+                        msg.success = true;
+                        node.status({ fill: "green", shape: "ring", text: "Deleted successfully" });
+                    } else {
+                        let errorMsg = "HTTP Error: " + response.status;
+                        try {
+                            if (response.data) {
+                                const errorBody = JSON.parse(response.data);
+                                if (errorBody.error && errorBody.error.message) {
+                                    errorMsg += " - " + errorBody.error.message;
+                                }
+                            }
+                        } catch (e) {
+                            // If we can't parse the error body, use the raw response
+                            if (response.data) {
+                                errorMsg += " - " + response.data;
+                            }
+                        }
+                        
+                        msg.payload = "Failed to delete event: " + errorMsg;
+                        msg.error = errorMsg;
+                        msg.statusCode = response.status;
+                        msg.success = false;
+                        node.status({ fill: "red", shape: "ring", text: "Failed to delete" });
+                    }
+                    node.send(msg);
+                })
+                .catch(error => {
                     msg.payload = "Error deleting event: " + error.message;
                     msg.error = error.message;
                     node.error(error, msg);
                     node.status({ fill: "red", shape: "ring", text: "calendar.status.failed" });
                     node.send(msg);
-                    return;
-                }
-                
-                // DELETE requests return 204 No Content on success
-                if (response.statusCode === 204) {
-                    msg.payload = "Successfully deleted event from " + calendarId;
-                    msg.eventId = eventId;
-                    msg.calendarId = calendarId;
-                    msg.success = true;
-                    node.status({ fill: "green", shape: "ring", text: "Deleted successfully" });
-                } else {
-                    let errorMsg = "HTTP Error: " + response.statusCode;
-                    try {
-                        if (body) {
-                            const errorBody = JSON.parse(body);
-                            if (errorBody.error && errorBody.error.message) {
-                                errorMsg += " - " + errorBody.error.message;
-                            }
-                        }
-                    } catch (e) {
-                        // If we can't parse the error body, use the raw response
-                        if (body) {
-                            errorMsg += " - " + body;
-                        }
-                    }
-                    
-                    msg.payload = "Failed to delete event: " + errorMsg;
-                    msg.error = errorMsg;
-                    msg.statusCode = response.statusCode;
-                    msg.success = false;
-                    node.status({ fill: "red", shape: "ring", text: "Failed to delete" });
-                }
-                node.send(msg);
-            })
+                });
         });
     }
 
