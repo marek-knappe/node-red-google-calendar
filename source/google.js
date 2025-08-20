@@ -123,12 +123,13 @@ module.exports = function(RED) {
         if (!req.hasOwnProperty("json")) {
             req.json = true;
         }
-        // Check if token is expired or will expire soon (within 5 minutes)
+        // Check if token is expired or will expire soon (within 10 minutes)
         var currentTime = new Date().getTime()/1000;
-        var tokenExpiryBuffer = 300; // 5 minutes buffer
+        var tokenExpiryBuffer = 600; // 10 minutes buffer
         
         if (!this.credentials.expireTime ||
             this.credentials.expireTime < (currentTime + tokenExpiryBuffer)) {
+            node.warn("Token expiring soon, refreshing proactively...");
             node.refreshToken(function (err) {
                 if (err) {
                     return cb(err);
@@ -157,15 +158,29 @@ module.exports = function(RED) {
                 if (err) {
                     return exponentialBackoff.backoff({err: err, data: data});
                 } else if (result.statusCode === 401) {
-                    // Token expired, refresh and retry
-                    node.warn(RED._("google.warn.refreshing-accesstoken"));
+                    // Token expired, refresh and retry automatically
+                    node.warn("Token expired (401), refreshing and retrying automatically...");
                     node.refreshToken(function (err) {
                         if (err) {
                             return cb(err);
                         }
-                        // Update the request with new token
+                        // Update the request with new token and retry immediately
                         req.auth = { bearer: node.credentials.accessToken };
-                        return node.request(req, cb);
+                        // Retry the request with new token
+                        request(req, function(retryErr, retryResult, retryData) {
+                            if (retryErr) {
+                                return cb(retryErr);
+                            } else if (retryResult.statusCode >= 400) {
+                                retryData = {
+                                    error: {
+                                        code: retryResult.statusCode,
+                                        message: retryResult.body,
+                                    },
+                                };
+                                return cb(null, retryData);
+                            }
+                            cb(null, retryData);
+                        });
                     });
                     return;
                 } else if (result.statusCode >= 400) {
