@@ -1,0 +1,89 @@
+[
+    {
+        "id": "delete-event-example",
+        "type": "tab",
+        "label": "Delete Event Example",
+        "disabled": false,
+        "info": "Example flow demonstrating how to delete events from Google Calendar using the deleteEvent node"
+    },
+    {
+        "id": "delete-event-trigger",
+        "type": "inject",
+        "z": "delete-event-example",
+        "name": "Delete Event",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "Delete Calendar Event",
+        "payloadType": "str",
+        "x": 130,
+        "y": 100,
+        "wires": [
+            [
+                "delete-event-node"
+            ]
+        ]
+    },
+    {
+        "id": "delete-event-node",
+        "type": "deleteEventFromCalendar",
+        "z": "delete-event-example",
+        "name": "Delete Event",
+        "google": "google-credentials",
+        "eventId": "event_id_here",
+        "calendarId": "primary",
+        "sendUpdates": "all",
+        "x": 350,
+        "y": 100,
+        "wires": [
+            [
+                "delete-output"
+            ]
+        ]
+    },
+    {
+        "id": "google-credentials",
+        "type": "google-api-credentials",
+        "z": "delete-event-example",
+        "name": "Google Calendar Credentials",
+        "displayName": "My Calendar"
+    },
+    {
+        "id": "delete-output",
+        "type": "debug",
+        "z": "delete-event-example",
+        "name": "Delete Result",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 570,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "comment-1",
+        "type": "comment",
+        "z": "delete-event-example",
+        "name": "This example shows how to delete events from Google Calendar with:",
+        "info": "• Event ID specification\n• Calendar ID specification\n• Send updates to all attendees\n• Confirmation of deletion\n\nNote: Replace 'event_id_here' with an actual event ID from your calendar.\nConfigure your Google OAuth2 credentials in the google-api-credentials node before running.",
+        "x": 350,
+        "y": 40,
+        "wires": []
+    }
+]

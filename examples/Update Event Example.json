@@ -1,0 +1,99 @@
+[
+    {
+        "id": "update-event-example",
+        "type": "tab",
+        "label": "Update Event Example",
+        "disabled": false,
+        "info": "Example flow demonstrating how to update events in Google Calendar using the updateEvent node"
+    },
+    {
+        "id": "update-event-trigger",
+        "type": "inject",
+        "z": "update-event-example",
+        "name": "Update Event",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "Update Calendar Event",
+        "payloadType": "str",
+        "x": 130,
+        "y": 100,
+        "wires": [
+            [
+                "update-event-node"
+            ]
+        ]
+    },
+    {
+        "id": "update-event-node",
+        "type": "updateEventAtCalendar",
+        "z": "update-event-example",
+        "name": "Update Event",
+        "google": "google-credentials",
+        "eventId": "event_id_here",
+        "calendarId": "primary",
+        "tittle": "Updated Team Meeting",
+        "description": "Updated description for team sync meeting",
+        "location": "Conference Room B",
+        "time": "2024-01-15T14:00:00 - 2024-01-15T15:00:00",
+        "timezone": "America/New_York",
+        "attend": 1,
+        "email1": "colleague@company.com",
+        "name1": "John Doe",
+        "conference": true,
+        "arrAttend": [],
+        "sendUpdates": "all",
+        "x": 350,
+        "y": 100,
+        "wires": [
+            [
+                "update-output"
+            ]
+        ]
+    },
+    {
+        "id": "google-credentials",
+        "type": "google-api-credentials",
+        "z": "update-event-example",
+        "name": "Google Calendar Credentials",
+        "displayName": "My Calendar"
+    },
+    {
+        "id": "update-output",
+        "type": "debug",
+        "z": "update-event-example",
+        "name": "Update Result",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 570,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "comment-1",
+        "type": "comment",
+        "z": "update-event-example",
+        "name": "This example shows how to update events in Google Calendar with:",
+        "info": "• Event ID specification\n• Updated title, description, and location\n• Modified time and timezone\n• Attendee management\n• Google Meet conference enabled\n• Send updates to all attendees\n\nNote: Replace 'event_id_here' with an actual event ID from your calendar.\nConfigure your Google OAuth2 credentials in the google-api-credentials node before running.",
+        "x": 350,
+        "y": 40,
+        "wires": []
+    }
+]

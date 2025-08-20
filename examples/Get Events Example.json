@@ -1,0 +1,92 @@
+[
+    {
+        "id": "get-events-example",
+        "type": "tab",
+        "label": "Get Events Example",
+        "disabled": false,
+        "info": "Example flow demonstrating how to retrieve events from Google Calendar using the getEvent node"
+    },
+    {
+        "id": "get-events-trigger",
+        "type": "inject",
+        "z": "get-events-example",
+        "name": "Get Events",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "Get Calendar Events",
+        "payloadType": "str",
+        "x": 130,
+        "y": 100,
+        "wires": [
+            [
+                "get-events-node"
+            ]
+        ]
+    },
+    {
+        "id": "get-events-node",
+        "type": "getEventFromCalendar",
+        "z": "get-events-example",
+        "name": "Get Events",
+        "google": "google-credentials",
+        "calendarId": "primary",
+        "timeMin": "2024-01-01T00:00:00Z",
+        "timeMax": "2024-12-31T23:59:59Z",
+        "maxResults": 10,
+        "singleEvents": true,
+        "orderBy": "startTime",
+        "x": 350,
+        "y": 100,
+        "wires": [
+            [
+                "events-output"
+            ]
+        ]
+    },
+    {
+        "id": "google-credentials",
+        "type": "google-api-credentials",
+        "z": "get-events-example",
+        "name": "Google Calendar Credentials",
+        "displayName": "My Calendar"
+    },
+    {
+        "id": "events-output",
+        "type": "debug",
+        "z": "get-events-example",
+        "name": "Events Result",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 570,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "comment-1",
+        "type": "comment",
+        "z": "get-events-example",
+        "name": "This example shows how to retrieve events from Google Calendar with:",
+        "info": "• Date range filtering (timeMin/timeMax)\n• Maximum results limit\n• Single events expansion\n• Ordered by start time\n• Primary calendar as source\n\nConfigure your Google OAuth2 credentials in the google-api-credentials node before running.",
+        "x": 350,
+        "y": 40,
+        "wires": []
+    }
+]

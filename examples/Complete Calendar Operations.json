@@ -1,0 +1,234 @@
+[
+    {
+        "id": "complete-calendar-example",
+        "type": "tab",
+        "label": "Complete Calendar Operations",
+        "disabled": false,
+        "info": "Comprehensive example demonstrating all Google Calendar operations: add, get, update, and delete events"
+    },
+    {
+        "id": "start-flow",
+        "type": "inject",
+        "z": "complete-calendar-example",
+        "name": "Start Flow",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "Start Calendar Operations",
+        "payloadType": "str",
+        "x": 130,
+        "y": 60,
+        "wires": [
+            [
+                "add-event-node"
+            ]
+        ]
+    },
+    {
+        "id": "add-event-node",
+        "type": "addEventToCalendar",
+        "z": "complete-calendar-example",
+        "name": "Add Event",
+        "google": "google-credentials",
+        "tittle": "Sample Event",
+        "description": "This is a sample event for demonstration",
+        "location": "Virtual Meeting",
+        "time": "2024-01-20T15:00:00 - 2024-01-20T16:00:00",
+        "timezone": "UTC",
+        "attend": 0,
+        "conference": true,
+        "arrAttend": [],
+        "calendarId2": "primary",
+        "x": 350,
+        "y": 60,
+        "wires": [
+            [
+                "add-success"
+            ]
+        ]
+    },
+    {
+        "id": "add-success",
+        "type": "change",
+        "z": "complete-calendar-example",
+        "name": "Extract Event ID",
+        "rules": [
+            {
+                "t": "set",
+                "p": "eventId",
+                "pt": "msg",
+                "to": "payload.eventId",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 570,
+        "y": 60,
+        "wires": [
+            [
+                "get-events-node"
+            ]
+        ]
+    },
+    {
+        "id": "get-events-node",
+        "type": "getEventFromCalendar",
+        "z": "complete-calendar-example",
+        "name": "Get Events",
+        "google": "google-credentials",
+        "calendarId": "primary",
+        "timeMin": "2024-01-20T00:00:00Z",
+        "timeMax": "2024-01-21T23:59:59Z",
+        "maxResults": 5,
+        "singleEvents": true,
+        "orderBy": "startTime",
+        "x": 790,
+        "y": 60,
+        "wires": [
+            [
+                "get-success"
+            ]
+        ]
+    },
+    {
+        "id": "get-success",
+        "type": "change",
+        "z": "complete-calendar-example",
+        "name": "Check Events",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "Events retrieved successfully",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1010,
+        "y": 60,
+        "wires": [
+            [
+                "update-event-node"
+            ]
+        ]
+    },
+    {
+        "id": "update-event-node",
+        "type": "updateEventAtCalendar",
+        "z": "complete-calendar-example",
+        "name": "Update Event",
+        "google": "google-credentials",
+        "eventId": "{{eventId}}",
+        "calendarId": "primary",
+        "tittle": "Updated Sample Event",
+        "description": "This event has been updated",
+        "location": "Updated Location",
+        "time": "2024-01-20T16:00:00 - 2024-01-20T17:00:00",
+        "timezone": "UTC",
+        "attend": 0,
+        "conference": true,
+        "arrAttend": [],
+        "sendUpdates": "none",
+        "x": 1230,
+        "y": 60,
+        "wires": [
+            [
+                "update-success"
+            ]
+        ]
+    },
+    {
+        "id": "update-success",
+        "type": "change",
+        "z": "complete-calendar-example",
+        "name": "Update Complete",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "Event updated successfully",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1450,
+        "y": 60,
+        "wires": [
+            [
+                "delete-event-node"
+            ]
+        ]
+    },
+    {
+        "id": "delete-event-node",
+        "type": "deleteEventFromCalendar",
+        "z": "complete-calendar-example",
+        "name": "Delete Event",
+        "google": "google-credentials",
+        "eventId": "{{eventId}}",
+        "calendarId": "primary",
+        "sendUpdates": "none",
+        "x": 1670,
+        "y": 60,
+        "wires": [
+            [
+                "final-output"
+            ]
+        ]
+    },
+    {
+        "id": "google-credentials",
+        "type": "google-api-credentials",
+        "z": "complete-calendar-example",
+        "name": "Google Calendar Credentials",
+        "displayName": "My Calendar"
+    },
+    {
+        "id": "final-output",
+        "type": "debug",
+        "z": "complete-calendar-example",
+        "name": "Final Result",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1890,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "comment-1",
+        "type": "comment",
+        "z": "complete-calendar-example",
+        "name": "Complete Calendar Operations Flow",
+        "info": "This comprehensive example demonstrates the complete lifecycle of Google Calendar events:\n\n1. **Add Event**: Creates a new event with Google Meet\n2. **Get Events**: Retrieves events from the calendar\n3. **Update Event**: Modifies the created event\n4. **Delete Event**: Removes the event from the calendar\n\nEach step passes data to the next, creating a complete workflow.\nConfigure your Google OAuth2 credentials in the google-api-credentials node before running.",
+        "x": 1010,
+        "y": 20,
+        "wires": []
+    }
+]

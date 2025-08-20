@@ -1,0 +1,99 @@
+[
+    {
+        "id": "add-event-example",
+        "type": "tab",
+        "label": "Add Event Example",
+        "disabled": false,
+        "info": "Example flow demonstrating how to add events to Google Calendar using the addEvent node"
+    },
+    {
+        "id": "add-event-trigger",
+        "type": "inject",
+        "z": "add-event-example",
+        "name": "Add Event",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "Add Event to Calendar",
+        "payloadType": "str",
+        "x": 130,
+        "y": 100,
+        "wires": [
+            [
+                "add-event-node"
+            ]
+        ]
+    },
+    {
+        "id": "add-event-node",
+        "type": "addEventToCalendar",
+        "z": "add-event-example",
+        "name": "Add Event",
+        "google": "google-credentials",
+        "tittle": "Team Meeting",
+        "description": "Weekly team sync meeting",
+        "location": "Conference Room A",
+        "time": "2024-01-15T10:00:00 - 2024-01-15T11:00:00",
+        "timezone": "America/New_York",
+        "attend": 2,
+        "email1": "colleague@company.com",
+        "name1": "John Doe",
+        "email2": "manager@company.com",
+        "name2": "Jane Manager",
+        "conference": true,
+        "arrAttend": [],
+        "calendarId2": "primary",
+        "x": 350,
+        "y": 100,
+        "wires": [
+            [
+                "success-output"
+            ]
+        ]
+    },
+    {
+        "id": "google-credentials",
+        "type": "google-api-credentials",
+        "z": "add-event-example",
+        "name": "Google Calendar Credentials",
+        "displayName": "My Calendar"
+    },
+    {
+        "id": "success-output",
+        "type": "debug",
+        "z": "add-event-example",
+        "name": "Event Result",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 570,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "comment-1",
+        "type": "comment",
+        "z": "add-event-example",
+        "name": "This example shows how to add an event to Google Calendar with:",
+        "info": "• Event title, description, and location\n• Start and end time with timezone\n• Attendees with email and name\n• Google Meet conference enabled\n• Primary calendar as target\n\nConfigure your Google OAuth2 credentials in the google-api-credentials node before running.",
+        "x": 350,
+        "y": 40,
+        "wires": []
+    }
+]
