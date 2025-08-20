@@ -1,6 +1,6 @@
 {
     "name": "@marek-knappe/node-red-google-calendar",
-    "version": "3.0.1",
+    "version": "3.0.2",
     "author": "Marek Knappe <marek.knappe@gmail.com>",
     "description": "Enhanced Google Calendar nodes for Node-RED with improved error handling, event links, and authentication. Based on @platmac/node-red-google-calendar with significant improvements.",
     "license": "Apache-2.0",
@@ -13,7 +13,7 @@
     ],
     "repository": {
         "type": "git",
-        "url": "https://github.com/marek-knappe/node-red-google-calendar.git"
+        "url": "git+https://github.com/marek-knappe/node-red-google-calendar.git"
     },
     "engines": {
         "node": ">=12.0.0"
