@@ -1,20 +1,30 @@
 {
-    "name": "@platmac/node-red-google-calendar",
+    "name": "@marek-knappe/node-red-google-calendar",
     "version": "0.3.0",
-    "author": "Hooke Jr. <platma@platma.com>",
-    "description": "The simplest node for google calendar events",
+    "author": "Marek Knappe <marek.knappe@gmail.com>",
+    "description": "Enhanced Google Calendar nodes for Node-RED with improved error handling, event links, and authentication. Based on @platmac/node-red-google-calendar with significant improvements.",
     "license": "Apache-2.0",
     "keywords": [
         "node-red",
-        "google-calendar"
+        "google-calendar",
+        "calendar",
+        "google-api",
+        "oauth2"
     ],
     "repository": {
         "type": "git",
-        "url": "https://github.com/PlatmaC/node-red-google-calendar.git"
+        "url": "https://github.com/marek-knappe/node-red-google-calendar.git"
     },
     "engines": {
         "node": ">=12.0.0"
     },
+    "homepage": "https://github.com/marek-knappe/node-red-google-calendar",
+    "bugs": "https://github.com/marek-knappe/node-red-google-calendar/issues",
+    "contributors": [
+        "Marek Knappe <marek.knappe@gmail.com>"
+    ],
+    "originalAuthor": "Hooke Jr. <platma@platma.com>",
+    "originalPackage": "@platmac/node-red-google-calendar",
     "node-red": {
         "version": ">=3.1.9",
         "nodes": {
