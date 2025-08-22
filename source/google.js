@@ -70,15 +70,17 @@ GoogleNode.prototype.refreshToken = function(cb) {
     });
     exponentialBackoff.on('ready', function() {
         axios.post(
+            'https://accounts.google.com/o/oauth2/token',
             {
-                url: 'https://accounts.google.com/o/oauth2/token',
-                json: true,
-                data: {
-                    grant_type: 'refresh_token',
-                    client_id: credentials.clientId,
-                    client_secret: credentials.clientSecret,
-                    refresh_token: credentials.refreshToken,
-                },
+                grant_type: 'refresh_token',
+                client_id: credentials.clientId,
+                client_secret: credentials.clientSecret,
+                refresh_token: credentials.refreshToken,
+            },
+            {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
             }
         )
         .then(function(response) {
@@ -114,51 +116,65 @@ GoogleNode.prototype.refreshToken = function(cb) {
     exponentialBackoff.emit('ready');
 };
 
-GoogleNode.prototype.request = function(req, cb) {
-    var node = this;
+    GoogleNode.prototype.request = function(req, cb) {
+        var node = this;
 
-    if (typeof req !== 'object') {
-        req = { url: req };
-    }
-    req.method = req.method || 'GET';
-    if (!req.hasOwnProperty("json")) {
-        req.json = true;
-    }
-    // Check if token is expired or will expire soon (within 10 minutes)
-    var currentTime = new Date().getTime()/1000;
-    var tokenExpiryBuffer = 600; // 10 minutes buffer
-    
-    if (!this.credentials.expireTime ||
-        this.credentials.expireTime < (currentTime + tokenExpiryBuffer)) {
-        node.warn("Token expiring soon, refreshing proactively...");
-        node.refreshToken(function (err) {
-            if (err) {
-                return cb(err);
-            }
-            // Update the request with new token
-            req.auth = { bearer: node.credentials.accessToken };
-            node.request(req, cb);
+        if (typeof req !== 'object') {
+            req = { url: req };
+        }
+        req.method = req.method || 'GET';
+        if (!req.hasOwnProperty("json")) {
+            req.json = true;
+        }
+        
+        // Check if token is expired or will expire soon (within 10 minutes)
+        var currentTime = new Date().getTime()/1000;
+        var tokenExpiryBuffer = 600; // 10 minutes buffer
+        
+        if (!this.credentials.expireTime ||
+            this.credentials.expireTime < (currentTime + tokenExpiryBuffer)) {
+            node.warn("Token expiring soon, refreshing proactively...");
+            node.refreshToken(function (err) {
+                if (err) {
+                    return cb(err);
+                }
+                // Update the request with new token
+                req.headers = req.headers || {};
+                req.headers.Authorization = 'Bearer ' + node.credentials.accessToken;
+                node.request(req, cb);
+            });
+            return;
+        }
+        
+        // always set access token to the latest ignoring any already present
+        req.headers = req.headers || {};
+        req.headers.Authorization = 'Bearer ' + this.credentials.accessToken;
+
+        var exponentialBackoff = createExponentialBackoff();
+        exponentialBackoff.on('backoff', function(number, delay) {
+            node.warn(RED._("google.warn.retry-request", {number: number + 1, delay: delay}));
+            node.eventEmitter.emit('retry', delay);
         });
-        return;
-    }
-    
-    // always set access token to the latest ignoring any already present
-    req.auth = { bearer: this.credentials.accessToken };
+        exponentialBackoff.on('fail', function(reason) {
+            node.error(RED._("google.error.too-many-refresh-attempts"));
+            cb(reason.err, reason.data);
+        });
+        exponentialBackoff.on('ready', function() {
+            // Make the request
+            makeRequest(req, node, exponentialBackoff, cb);
+        });
 
-    var exponentialBackoff = createExponentialBackoff();
-    exponentialBackoff.on('backoff', function(number, delay) {
-        node.warn(RED._("google.warn.retry-request", {number: number + 1, delay: delay}));
-        node.eventEmitter.emit('retry', delay);
-    });
-    exponentialBackoff.on('fail', function(reason) {
-        node.error(RED._("google.error.too-many-refresh-attempts"));
-        cb(reason.err, reason.data);
-    });
-    exponentialBackoff.on('ready', function() {
+        exponentialBackoff.emit('ready');
+    };
+
+    function makeRequest(req, node, exponentialBackoff, cb) {
         axios(req)
         .then(function(response) {
-            var result = response.data;
-            if (response.status === 401) {
+            // Success - pass the data to callback
+            cb(null, response.data);
+        })
+        .catch(function(error) {
+            if (error.response && error.response.status === 401) {
                 // Token expired, refresh and retry automatically
                 node.warn("Token expired (401), refreshing and retrying automatically...");
                 node.refreshToken(function (err) {
@@ -166,45 +182,40 @@ GoogleNode.prototype.request = function(req, cb) {
                         return cb(err);
                     }
                     // Update the request with new token and retry immediately
-                    req.auth = { bearer: node.credentials.accessToken };
+                    req.headers.Authorization = 'Bearer ' + node.credentials.accessToken;
                     // Retry the request with new token
                     axios(req)
                     .then(function(retryResponse) {
-                        var retryResult = retryResponse.data;
-                        if (retryResponse.status >= 400) {
-                            retryResult = {
-                                error: {
-                                    code: retryResponse.status,
-                                    message: retryResult.body,
-                                },
-                            };
-                            return cb(null, retryResult);
-                        }
-                        cb(null, retryResult);
+                        cb(null, retryResponse.data);
                     })
                     .catch(function(retryErr) {
+                        if (retryErr.response && retryErr.response.status >= 400) {
+                            var errorResult = {
+                                error: {
+                                    code: retryErr.response.status,
+                                    message: retryErr.response.data ? retryErr.response.data.error : retryErr.message,
+                                },
+                            };
+                            return cb(null, errorResult);
+                        }
                         return cb(retryErr);
                     });
                 });
-                return;
-            } else if (response.status >= 400) {
-                result = {
+            } else if (error.response && error.response.status >= 400) {
+                // Other HTTP errors - use exponential backoff
+                var errorResult = {
                     error: {
-                        code: response.status,
-                        message: result.body,
+                        code: error.response.status,
+                        message: error.response.data ? error.response.data.error : error.message,
                     },
                 };
-                return exponentialBackoff.backoff({err: err, data: result});
+                return exponentialBackoff.backoff({err: error, data: errorResult});
+            } else {
+                // Network or other errors - use exponential backoff
+                return exponentialBackoff.backoff({err: error, data: null});
             }
-            cb(err, result);
-        })
-        .catch(function(error) {
-            return exponentialBackoff.backoff({err: error, data: error.response ? error.response.data : null});
         });
-    });
-
-    exponentialBackoff.emit('ready');
-};
+    }
 
 RED.httpAdmin.get('/google-api-credentials/auth', function(req, res){
     if (!req.query.clientId || !req.query.clientSecret ||
@@ -259,17 +270,21 @@ RED.httpAdmin.get('/google-api-credentials/auth/callback', function(req, res) {
         );
     }
 
-    axios.post({
-        url: 'https://accounts.google.com/o/oauth2/token',
-        json: true,
-        data: {
+    axios.post(
+        'https://accounts.google.com/o/oauth2/token',
+        {
             grant_type: 'authorization_code',
             code: req.query.code,
             client_id: credentials.clientId,
             client_secret: credentials.clientSecret,
             redirect_uri: credentials.callback
         },
-    })
+        {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        }
+    )
     .then(function(response) {
         var data = response.data;
         if (data.error) {
@@ -285,11 +300,14 @@ RED.httpAdmin.get('/google-api-credentials/auth/callback', function(req, res) {
         delete credentials.csrfToken;
         delete credentials.callback;
         RED.nodes.addCredentials(node_id, credentials);
-        axios.get({
-            url: 'https://www.googleapis.com/userinfo/v2/me',
-            json: true,
-            auth: { bearer: credentials.accessToken },
-        })
+        axios.get(
+            'https://www.googleapis.com/userinfo/v2/me',
+            {
+                headers: {
+                    'Authorization': 'Bearer ' + credentials.accessToken
+                }
+            }
+        )
         .then(function(response) {
             var data = response.data;
             if (data.error) {
@@ -325,13 +343,19 @@ GoogleAPINode.prototype.request = function(req, cb) {
         req = { url: req };
     }
     req.method = req.method || 'GET';
-    if (!req.hasOwnProperty("json")) {
-        req.json = true;
+    
+    // Convert qs to params for axios
+    if (req.qs) {
+        req.params = req.qs;
+        delete req.qs;
     }
-    if (!req.qs) {
-        req.qs = {};
+    
+    // Add API key to params
+    if (!req.params) {
+        req.params = {};
     }
-    req.qs.key = this.credentials.key;
+    req.params.key = this.credentials.key;
+    
     axios(req)
     .then(function(response) {
         var result = response.data;
