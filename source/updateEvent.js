@@ -58,36 +58,37 @@ module.exports = function(RED) {
                 method: "PATCH",
                 url: linkUrl,
                 headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer " + node.google.credentials.accessToken
+                    "Content-Type": "application/json"
                 },
-                body: JSON.stringify(patchObj)
+                data: patchObj
             };
             
-            axios(opts)
-                .then(response => {
-                    if (response.data.kind == "calendar#event") {
-                        msg.payload = "Successfully updated event of " + calendarId;
-                        msg.meetLink = response.data.hangoutLink ? response.data.hangoutLink : null;
-                        msg.eventLink = response.data.htmlLink ? response.data.htmlLink : null;
-                        msg.thisEventId = response.data.id;
-                        msg.success = true;
-                        node.status({ fill: "green", shape: "ring", text: "Update successfully" });
-                    } else {
-                        msg.payload = "Failed to update event: Invalid response format";
-                        msg.error = "Invalid response format";
-                        msg.success = false;
-                        node.status({ fill: "red", shape: "ring", text: "Failed to update" });
-                    }
-                    node.send(msg);
-                })
-                .catch(error => {
-                    msg.payload = "Error updating event: " + error.message;
-                    msg.error = error.message;
-                    node.error(error, msg);
+            // Use the google request method which handles token refresh automatically
+            node.google.request(opts, function(err, responseData) {
+                if (err) {
+                    msg.payload = "Error updating event: " + err.message;
+                    msg.error = err.message;
+                    node.error(err, msg);
                     node.status({ fill: "red", shape: "ring", text: "calendar.status.failed" });
                     node.send(msg);
-                });
+                    return;
+                }
+                
+                if (responseData.kind == "calendar#event") {
+                    msg.payload = "Successfully updated event of " + calendarId;
+                    msg.meetLink = responseData.hangoutLink ? responseData.hangoutLink : null;
+                    msg.eventLink = responseData.htmlLink ? responseData.htmlLink : null;
+                    msg.thisEventId = responseData.id;
+                    msg.success = true;
+                    node.status({ fill: "green", shape: "ring", text: "Update successfully" });
+                } else {
+                    msg.payload = "Failed to update event: Invalid response format";
+                    msg.error = "Invalid response format";
+                    msg.success = false;
+                    node.status({ fill: "red", shape: "ring", text: "Failed to update" });
+                }
+                node.send(msg);
+            });
         });
     }
 

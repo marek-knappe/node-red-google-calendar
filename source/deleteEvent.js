@@ -25,51 +25,35 @@ module.exports = function(RED) {
             var linkUrl = baseApi + encodeURIComponent(calendarId) + '/events/' + eventId + emailNotify;
             var opts = {
                 method: "DELETE",
-                url: linkUrl,
-                headers: {
-                    "Authorization": "Bearer " + node.google.credentials.accessToken
-                }
+                url: linkUrl
             };
             
-            axios(opts)
-                .then(response => {
-                    if (response.status === 204) {
-                        msg.payload = "Successfully deleted event from " + calendarId;
-                        msg.eventId = eventId;
-                        msg.calendarId = calendarId;
-                        msg.success = true;
-                        node.status({ fill: "green", shape: "ring", text: "Deleted successfully" });
-                    } else {
-                        let errorMsg = "HTTP Error: " + response.status;
-                        try {
-                            if (response.data) {
-                                const errorBody = JSON.parse(response.data);
-                                if (errorBody.error && errorBody.error.message) {
-                                    errorMsg += " - " + errorBody.error.message;
-                                }
-                            }
-                        } catch (e) {
-                            // If we can't parse the error body, use the raw response
-                            if (response.data) {
-                                errorMsg += " - " + response.data;
-                            }
-                        }
-                        
-                        msg.payload = "Failed to delete event: " + errorMsg;
-                        msg.error = errorMsg;
-                        msg.statusCode = response.status;
-                        msg.success = false;
-                        node.status({ fill: "red", shape: "ring", text: "Failed to delete" });
-                    }
-                    node.send(msg);
-                })
-                .catch(error => {
-                    msg.payload = "Error deleting event: " + error.message;
-                    msg.error = error.message;
-                    node.error(error, msg);
+            // Use the google request method which handles token refresh automatically
+            node.google.request(opts, function(err, responseData) {
+                if (err) {
+                    msg.payload = "Error deleting event: " + err.message;
+                    msg.error = err.message;
+                    node.error(err, msg);
                     node.status({ fill: "red", shape: "ring", text: "calendar.status.failed" });
                     node.send(msg);
-                });
+                    return;
+                }
+                
+                // DELETE requests return 204 No Content on success
+                if (responseData === null || responseData === undefined) {
+                    msg.payload = "Successfully deleted event from " + calendarId;
+                    msg.eventId = eventId;
+                    msg.calendarId = calendarId;
+                    msg.success = true;
+                    node.status({ fill: "green", shape: "ring", text: "Deleted successfully" });
+                } else {
+                    msg.payload = "Failed to delete event: " + (responseData.error ? responseData.error.message : "Unknown error");
+                    msg.error = responseData.error ? responseData.error.message : "Unknown error";
+                    msg.success = false;
+                    node.status({ fill: "red", shape: "ring", text: "Failed to delete" });
+                }
+                node.send(msg);
+            });
         });
     }
 

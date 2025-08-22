@@ -64,38 +64,38 @@ module.exports = function(RED) {
                 method: "POST",
                 url: linkUrl,
                 headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer " + node.google.credentials.accessToken
+                    "Content-Type": "application/json"
                 },
                 data: newObj
             };
-            axios(opts)
-                .then(response => {
-                    const responseData = response.data;
-                    if (responseData.kind == "calendar#event") {
-                        msg.payload = `Successfully added event to ${calendarId}. ${responseData.hangoutLink ? `Link for Meet: ${responseData.hangoutLink}`: ""}`;
-                        msg.meetLink = responseData.hangoutLink ? responseData.hangoutLink : null;
-                        msg.eventLink = responseData.htmlLink ? responseData.htmlLink : null;
-                        msg.eventId = responseData.id;
-                        msg.success = true;
-                        node.status({ fill: "green", shape: "ring", text: "Added successfully" });
-                    } else {
-                        msg.payload = "Failed to add event: Invalid response format";
-                        msg.error = "Invalid response format";
-                        msg.success = false;
-                        node.status({ fill: "red", shape: "ring", text: "Failed to add" });
-                    }
-                    
-                    node.send(msg);
-                })
-                .catch(error => {
-                    msg.payload = "Error adding event: " + error.message;
-                    msg.error = error.message;
-                    node.error(error, msg);
+            
+            // Use the google request method which handles token refresh automatically
+            node.google.request(opts, function(err, responseData) {
+                if (err) {
+                    msg.payload = "Error adding event: " + err.message;
+                    msg.error = err.message;
+                    node.error(err, msg);
                     node.status({fill:"red",shape:"ring",text:"calendar.status.failed"});
                     node.send(msg);
                     return;
-                });
+                }
+                
+                if (responseData.kind == "calendar#event") {
+                    msg.payload = `Successfully added event to ${calendarId}. ${responseData.hangoutLink ? `Link for Meet: ${responseData.hangoutLink}`: ""}`;
+                    msg.meetLink = responseData.hangoutLink ? responseData.hangoutLink : null;
+                    msg.eventLink = responseData.htmlLink ? responseData.htmlLink : null;
+                    msg.eventId = responseData.id;
+                    msg.success = true;
+                    node.status({ fill: "green", shape: "ring", text: "Added successfully" });
+                } else {
+                    msg.payload = "Failed to add event: Invalid response format";
+                    msg.error = "Invalid response format";
+                    msg.success = false;
+                    node.status({ fill: "red", shape: "ring", text: "Failed to add" });
+                }
+                
+                node.send(msg);
+            });
         });
     }
     RED.nodes.registerType("addEventToCalendar", addEventToCalendar);
