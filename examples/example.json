@@ -58,7 +58,7 @@
         "calendarId2": "",
         "timezone": "+3",
         "conference": true,
-        "tittle": "Test title",
+        "title": "Test title",
         "description": "This is description",
         "location": "Ukraine",
         "time": "06/25/2024 12:00 AM - 06/26/2024 11:59 PM",
