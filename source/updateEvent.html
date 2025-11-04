@@ -9,6 +9,7 @@
             eventId: { value: "" },
             title: { value: "" },
             description: { value: "" },
+            colorId: { value: "" },
             location: { value: "" },
             emailNotify: { value: true },
             conference: {value: false}
@@ -73,6 +74,10 @@
         <input type="text" id="node-input-description" placeholder="Description">
     </div>
     <div class="form-row">
+        <label for="node-input-colorId"><i class="fa fa-paint-brush"></i> Color ID </label>
+        <input type="text" id="node-input-colorId" placeholder="Color ID (1-11)">
+    </div>
+    <div class="form-row">
         <label for="node-input-location"><i class="fa fa-map-marker"></i> Location</label>
         <input type="text" id="node-input-location" placeholder="Ho Chi Minh">
     </div>
@@ -92,6 +97,7 @@
         <ul>
             <li><b>Title</b> - the summary string from the calendar entry</li>
             <li><b>Description</b> - the description from the calendar entry</li>
+            <li><b>Color ID</b> - the color ID from the calendar entry (1-11)</li>
             <li><b>Location</b> - the location string from the calendar entry</li>
             <li><b>Conference</b> - flag for auto-create of google-meet conference</li>  
         </ul>

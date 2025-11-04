@@ -15,6 +15,7 @@ module.exports = function(RED) {
             calendarId = msg.calendarId? msg.calendarId : calendarId
             n.tittle = msg.tittle ? msg.tittle : n.tittle
             n.description = msg.description ? msg.description : n.description
+            n.colorId = msg.colorId ? msg.colorId : n.colorId
             n.location = msg.location ? msg.location : n.location
             n.arrAttend = msg.arrAttend ? msg.arrAttend : n.arrAttend ? n.arrAttend : []
             n.conference = msg.conference ? msg.conference : n.conference
@@ -56,6 +57,9 @@ module.exports = function(RED) {
             attendees: arrAttend
         };
 
+            if (n.colorId){
+                newObj.colorId = n.colorId;
+            }
             if (n.conference){
                 newObj.conferenceData = conferenceData;
             }
