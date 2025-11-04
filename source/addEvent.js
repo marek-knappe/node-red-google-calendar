@@ -51,13 +51,15 @@ module.exports = function(RED) {
         var newObj = {
             summary: n.tittle,
             description: n.description,
-            colorId: n.colorId,
             location: n.location,
             start: {dateTime: new Date(timeStart)},
             end: {dateTime: new Date(timeEnd)},
             attendees: arrAttend
         };
 
+            if (n.colorId){
+                newObj.colorId = n.colorId;
+            }
             if (n.conference){
                 newObj.conferenceData = conferenceData;
             }
