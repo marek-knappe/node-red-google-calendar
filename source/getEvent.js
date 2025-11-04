@@ -62,6 +62,7 @@ module.exports = function(RED) {
                         "CalendarId": data.summary,
                         "EventId" : val.id,
                         "Description" : val.description,
+                        "ColorId" : val.colorId,
                         "StartDate" : startDate,
                         "EndDate" : endDate,
                         "Title" : title,

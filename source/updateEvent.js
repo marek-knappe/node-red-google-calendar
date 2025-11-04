@@ -20,6 +20,7 @@ module.exports = function(RED) {
             let calendarId = n.calendarId || msg.calendarId || "",
                 eventId = n.eventId || msg.eventId || "",
                 description = n.description || msg.description || "",
+                colorId = n.colorId || msg.colorId || "",
                 title = n.title || msg.title || "",
                 location = n.location || msg.location || "",
                 emailNotify = n.emailNotify || msg.emailNotify ? "?sendUpdates=all" : "";
@@ -39,6 +40,7 @@ module.exports = function(RED) {
             let patchObj = {
                 summary: title,
                 description: description,
+                colorId: colorId,
                 location: location
             }
             if (n.conference){

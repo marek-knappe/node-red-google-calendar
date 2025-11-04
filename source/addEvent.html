@@ -10,6 +10,7 @@
             conference: {value: false},
             tittle: { value: "" },
             description: { value: "" },
+            colorId: { value: "" },
             location: { value: "" },
             time: { value: "" },
             attend: { value: "" },
@@ -131,6 +132,10 @@
         <input type="text" id="node-input-description" placeholder="Description">
     </div>
     <div class="form-row">
+        <label for="node-input-colorId"><i class="fa fa-paint-brush"></i> Color ID </label>
+        <input type="text" id="node-input-colorId" placeholder="Color ID (1-11)">
+    </div>
+    <div class="form-row">
         <label for="node-input-location"><i class="fa fa-map-marker"></i> Location</label>
         <input type="text" id="node-input-location" placeholder="Ho Chi Minh">
     </div>    
@@ -246,6 +251,7 @@
             <li><b>Calendar</b> - the summary string from the calendar entry</li>
             <li><b>title</b> - the summary string from the calendar entry</li>
             <li><b>description</b> - the description from the calendar entry</li>
+            <li><b>colorId</b> - the color ID from the calendar entry (1-11)</li>
             <li><b>location</b> - the location string from the calendar entry</li>
             <li><b>conference</b> - flag for auto-create of google-meet conference</li>  
             <li><b>timezone</b> - timezone</li>  
