@@ -1,6 +1,13 @@
 var axios = require('axios');
 module.exports = function(RED) {
     "use strict";
+    
+    const GOOGLE_COLOR_MAP = {
+        '1': '#7986cb', '2': '#33b679', '3': '#8e24aa', '4': '#e67c73', 
+        '5': '#f6bf26', '6': '#F4511E', '7': '#039be5', '8': '#616161', 
+        '9': '#6E72C3', '10': '#0b8043', '11': '#d50000' 
+    };
+    
     function getEventFromCalendar(n) {
         RED.nodes.createNode(this,n);
         this.google = RED.nodes.getNode(n.google);
@@ -63,6 +70,7 @@ module.exports = function(RED) {
                         "EventId" : val.id,
                         "Description" : val.description,
                         "ColorId" : val.colorId,
+                        "Color" : val.colorId ? GOOGLE_COLOR_MAP[val.colorId] : null,
                         "StartDate" : startDate,
                         "EndDate" : endDate,
                         "Title" : title,
