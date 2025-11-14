@@ -15,17 +15,17 @@ module.exports = function(RED) {
             // Support both direct msg properties and msg.payload properties
             const payload = msg.payload || {};
             
-            calendarId = msg.calendarId? msg.calendarId : calendarId
+            calendarId = payload.calendarId || msg.calendarId || calendarId
             n.title = payload.summary || msg.summary || msg.title || msg.tittle || n.title || n.tittle
             n.description = payload.description || msg.description || n.description
             n.colorId = payload.colorId || msg.colorId || n.colorId
             n.location = payload.location || msg.location || n.location
-            n.arrAttend = msg.arrAttend ? msg.arrAttend : n.arrAttend ? n.arrAttend : []
-            n.conference = msg.conference ? msg.conference : n.conference
+            n.arrAttend = payload.attendees || payload.arrAttend || msg.arrAttend || (n.arrAttend ? n.arrAttend : [])
+            n.conference = payload.conference || msg.conference || n.conference
             n.iCalUID = payload.iCalUID || msg.iCalUID || n.iCalUID
             var timeStart; 
             var timeEnd;
-            let timezone = msg.timezone ? msg.timezone : n.timezone
+            let timezone = payload.timezone || msg.timezone || n.timezone
                 timeStart= payload.start || msg.start || n.time.split(" - ")[0];
                 timeEnd= payload.end || msg.end || n.time.split(" - ")[1];
              timeStart += `${timezone}`;

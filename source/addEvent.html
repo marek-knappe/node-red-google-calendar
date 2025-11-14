@@ -248,7 +248,7 @@
     <p>Create and add a new event to a <a href="https://www.google.com/calendar">Google Calendar</a>.</p>
     <p>The incoming message can provide the following properties:
         <ul>
-            <li><b>msg.calendarId</b> - the calendar ID where the event should be created</li>
+            <li><b>msg.payload.calendarId</b> or <b>msg.calendarId</b> - the calendar ID where the event should be created</li>
             <li><b>msg.payload.summary</b> or <b>msg.title</b> - the title/summary of the calendar event</li>
             <li><b>msg.payload.description</b> or <b>msg.description</b> - the description of the event</li>
             <li><b>msg.payload.colorId</b> or <b>msg.colorId</b> - the color ID for the event (1-11)</li>
@@ -256,8 +256,9 @@
             <li><b>msg.payload.start</b> or <b>msg.start</b> - start date/time of the event</li>        
             <li><b>msg.payload.end</b> or <b>msg.end</b> - end date/time of the event</li>
             <li><b>msg.payload.iCalUID</b> or <b>msg.iCalUID</b> - unique identifier for the calendar event</li>
-            <li><b>msg.conference</b> - flag for auto-create of Google Meet conference</li>  
-            <li><b>msg.timezone</b> - timezone offset (e.g., "+0", "-5")</li>  
+            <li><b>msg.payload.attendees</b> or <b>msg.payload.arrAttend</b> or <b>msg.arrAttend</b> - array of attendee objects</li>
+            <li><b>msg.payload.conference</b> or <b>msg.conference</b> - flag for auto-create of Google Meet conference</li>  
+            <li><b>msg.payload.timezone</b> or <b>msg.timezone</b> - timezone offset (e.g., "+0", "-5")</li>  
         </ul>
     </p>
     <p>Properties from <b>msg.payload</b> take priority over direct <b>msg</b> properties, which take priority over node configuration.</p>

@@ -95,15 +95,15 @@
     <p>Update an existing event in a <a href="https://www.google.com/calendar">Google Calendar</a>.</p>
     <p>The incoming message can provide the following properties:
         <ul>
-            <li><b>msg.calendarId</b> - the calendar ID where the event is located</li>
+            <li><b>msg.payload.calendarId</b> or <b>msg.calendarId</b> - the calendar ID where the event is located</li>
             <li><b>msg.payload.eventId</b> or <b>msg.eventId</b> - the unique identifier of the event to update</li>
             <li><b>msg.payload.summary</b> or <b>msg.title</b> - the new title/summary for the event</li>
             <li><b>msg.payload.description</b> or <b>msg.description</b> - the new description for the event</li>
             <li><b>msg.payload.colorId</b> or <b>msg.colorId</b> - the new color ID for the event (1-11)</li>
             <li><b>msg.payload.location</b> or <b>msg.location</b> - the new location for the event</li>
             <li><b>msg.payload.iCalUID</b> or <b>msg.iCalUID</b> - unique identifier for the calendar event</li>
-            <li><b>msg.conference</b> - flag for auto-create of Google Meet conference</li>  
-            <li><b>msg.emailNotify</b> - flag to notify all attendees about event changes</li>
+            <li><b>msg.payload.conference</b> or <b>msg.conference</b> - flag for auto-create of Google Meet conference</li>  
+            <li><b>msg.payload.emailNotify</b> or <b>msg.emailNotify</b> - flag to notify all attendees about event changes</li>
         </ul>
     </p>
     <p>Properties from <b>msg.payload</b> take priority over direct <b>msg</b> properties, which take priority over node configuration.</p>
