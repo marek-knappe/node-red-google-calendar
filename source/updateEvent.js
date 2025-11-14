@@ -17,12 +17,16 @@ module.exports = function(RED) {
         var node = this;
 
         node.on('input', function (msg) {
-            let calendarId = n.calendarId || msg.calendarId || "",
-                eventId = n.eventId || msg.eventId || "",
-                description = n.description || msg.description || "",
-                colorId = n.colorId || msg.colorId || "",
-                title = n.title || msg.title || "",
-                location = n.location || msg.location || "",
+            // Support both direct msg properties and msg.payload properties
+            const payload = msg.payload || {};
+            
+            let calendarId = msg.calendarId || n.calendarId || "",
+                eventId = payload.eventId || msg.eventId || n.eventId || "",
+                description = payload.description || msg.description || n.description || "",
+                colorId = payload.colorId || msg.colorId || n.colorId || "",
+                title = payload.summary || msg.summary || msg.title || n.title || "",
+                location = payload.location || msg.location || n.location || "",
+                iCalUID = payload.iCalUID || msg.iCalUID || n.iCalUID || "",
                 emailNotify = n.emailNotify || msg.emailNotify ? "?sendUpdates=all" : "";
                 n.conference = msg.conference ? msg.conference : n.conference
                 const confecerceCreate = `${emailNotify.length>0 ? '&' : '?'}conferenceDataVersion=1`;
@@ -45,6 +49,9 @@ module.exports = function(RED) {
             }
             if (n.conference){
                 patchObj.conferenceData = conferenceData;
+            }
+            if (iCalUID){
+                patchObj.iCalUID = iCalUID;
             }
 
             //remove empty fields
