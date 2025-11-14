@@ -8,7 +8,7 @@
             calendarId2: { value: "" },
             timezone: {value: "+0"},
             conference: {value: false},
-            tittle: { value: "" },
+            title: { value: "" },
             description: { value: "" },
             colorId: { value: "" },
             location: { value: "" },
@@ -124,8 +124,8 @@
         <select id="node-input-calendarId2" style="width: 70%"></select>
     </div>
     <div class="form-row">
-        <label for="node-input-tittle"><i class="fa fa-bookmark"></i> Tittle</label>
-        <input type="text" id="node-input-tittle" placeholder="Tittle">
+        <label for="node-input-title"><i class="fa fa-bookmark"></i> Title</label>
+        <input type="text" id="node-input-title" placeholder="Title">
     </div>
     <div class="form-row">
         <label for="node-input-description"><i class="fa fa-align-justify"></i> Description </label>
@@ -245,23 +245,30 @@
 </script>
 
 <script type="text/html" data-help-name="addEventToCalendar">
-    <p>Send a message every time an event occurs in a <a href="https://www.google.com/calendar">Google Calendar</a>.</p>
+    <p>Create and add a new event to a <a href="https://www.google.com/calendar">Google Calendar</a>.</p>
     <p>The incoming message can provide the following properties:
         <ul>
-            <li><b>Calendar</b> - the summary string from the calendar entry</li>
-            <li><b>title</b> - the summary string from the calendar entry</li>
-            <li><b>description</b> - the description from the calendar entry</li>
-            <li><b>colorId</b> - the color ID from the calendar entry (1-11)</li>
-            <li><b>location</b> - the location string from the calendar entry</li>
-            <li><b>conference</b> - flag for auto-create of google-meet conference</li>  
-            <li><b>timezone</b> - timezone</li>  
-            <li><b>start</b> - date of start time</li>        
-            <li><b>end</b> - date of end time</li>        
+            <li><b>msg.payload.calendarId</b> or <b>msg.calendarId</b> - the calendar ID where the event should be created</li>
+            <li><b>msg.payload.summary</b> or <b>msg.title</b> - the title/summary of the calendar event</li>
+            <li><b>msg.payload.description</b> or <b>msg.description</b> - the description of the event</li>
+            <li><b>msg.payload.colorId</b> or <b>msg.colorId</b> - the color ID for the event (1-11)</li>
+            <li><b>msg.payload.location</b> or <b>msg.location</b> - the location string for the event</li>
+            <li><b>msg.payload.start</b> or <b>msg.start</b> - start date/time of the event</li>        
+            <li><b>msg.payload.end</b> or <b>msg.end</b> - end date/time of the event</li>
+            <li><b>msg.payload.iCalUID</b> or <b>msg.iCalUID</b> - unique identifier for the calendar event</li>
+            <li><b>msg.payload.attendees</b> or <b>msg.payload.arrAttend</b> or <b>msg.arrAttend</b> - array of attendee objects</li>
+            <li><b>msg.payload.conference</b> or <b>msg.conference</b> - flag for auto-create of Google Meet conference</li>  
+            <li><b>msg.payload.timezone</b> or <b>msg.timezone</b> - timezone offset (e.g., "+0", "-5")</li>  
         </ul>
     </p>
+    <p>Properties from <b>msg.payload</b> take priority over direct <b>msg</b> properties, which take priority over node configuration.</p>
     <p>The message sent from the node will have properties:
         <ul>        
-          <li><b>payload</b> - Success/Error</li>
+          <li><b>payload</b> - Success/Error message</li>
+          <li><b>eventId</b> - the ID of the created event</li>
+          <li><b>eventLink</b> - direct link to the calendar event</li>
+          <li><b>meetLink</b> - Google Meet link (if conference was enabled)</li>
+          <li><b>success</b> - boolean indicating success/failure</li>
         </ul>
       </p>
 </script>

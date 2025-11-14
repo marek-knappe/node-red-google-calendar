@@ -17,14 +17,18 @@ module.exports = function(RED) {
         var node = this;
 
         node.on('input', function (msg) {
-            let calendarId = n.calendarId || msg.calendarId || "",
-                eventId = n.eventId || msg.eventId || "",
-                description = n.description || msg.description || "",
-                colorId = n.colorId || msg.colorId || "",
-                title = n.title || msg.title || "",
-                location = n.location || msg.location || "",
-                emailNotify = n.emailNotify || msg.emailNotify ? "?sendUpdates=all" : "";
-                n.conference = msg.conference ? msg.conference : n.conference
+            // Support both direct msg properties and msg.payload properties
+            const payload = msg.payload || {};
+            
+            let calendarId = payload.calendarId || msg.calendarId || n.calendarId || "",
+                eventId = payload.eventId || msg.eventId || n.eventId || "",
+                description = payload.description || msg.description || n.description || "",
+                colorId = payload.colorId || msg.colorId || n.colorId || "",
+                title = payload.summary || msg.summary || msg.title || n.title || "",
+                location = payload.location || msg.location || n.location || "",
+                iCalUID = payload.iCalUID || msg.iCalUID || n.iCalUID || "",
+                emailNotify = payload.emailNotify || msg.emailNotify || n.emailNotify ? "?sendUpdates=all" : "";
+                n.conference = payload.conference || msg.conference || n.conference
                 const confecerceCreate = `${emailNotify.length>0 ? '&' : '?'}conferenceDataVersion=1`;
             if( !eventId || !calendarId ) {
                 node.status({ fill: "red", shape: "ring", text: "Please specify eventId and calendarId" });
@@ -45,6 +49,9 @@ module.exports = function(RED) {
             }
             if (n.conference){
                 patchObj.conferenceData = conferenceData;
+            }
+            if (iCalUID){
+                patchObj.iCalUID = iCalUID;
             }
 
             //remove empty fields
