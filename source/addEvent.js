@@ -16,7 +16,7 @@ module.exports = function(RED) {
             const payload = msg.payload || {};
             
             calendarId = msg.calendarId? msg.calendarId : calendarId
-            n.title = payload.summary || msg.summary || msg.title || msg.tittle || n.tittle
+            n.title = payload.summary || msg.summary || msg.title || msg.tittle || n.title || n.tittle
             n.description = payload.description || msg.description || n.description
             n.colorId = payload.colorId || msg.colorId || n.colorId
             n.location = payload.location || msg.location || n.location
