@@ -13,7 +13,7 @@ module.exports = function(RED) {
 
         node.on('input', function(msg) {
             calendarId = msg.calendarId? msg.calendarId : calendarId
-            n.tittle = msg.tittle ? msg.tittle : n.tittle
+            n.title = (msg.title ?? msg.tittle) ? (msg.title ?? msg.tittle) : (n.title ?? n.tittle)
             n.description = msg.description ? msg.description : n.description
             n.location = msg.location ? msg.location : n.location
             n.arrAttend = msg.arrAttend ? msg.arrAttend : n.arrAttend ? n.arrAttend : []
@@ -48,7 +48,7 @@ module.exports = function(RED) {
           
         var api = 'https://www.googleapis.com/calendar/v3/calendars/';        
         var newObj = {
-            summary: n.tittle,
+            summary: n.title,
             description: n.description,
             location: n.location,
             start: {dateTime: new Date(timeStart)},

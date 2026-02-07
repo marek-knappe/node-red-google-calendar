@@ -43,7 +43,7 @@
         "google": "google-credentials",
         "eventId": "event_id_here",
         "calendarId": "primary",
-        "tittle": "Updated Team Meeting",
+        "title": "Updated Team Meeting",
         "description": "Updated description for team sync meeting",
         "location": "Conference Room B",
         "time": "2024-01-15T14:00:00 - 2024-01-15T15:00:00",

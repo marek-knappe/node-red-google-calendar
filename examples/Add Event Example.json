@@ -41,7 +41,7 @@
         "z": "add-event-example",
         "name": "Add Event",
         "google": "google-credentials",
-        "tittle": "Team Meeting",
+        "title": "Team Meeting",
         "description": "Weekly team sync meeting",
         "location": "Conference Room A",
         "time": "2024-01-15T10:00:00 - 2024-01-15T11:00:00",
